@@ -1,0 +1,107 @@
+---In this, we learn about what is database backup recovery and we also learn about how to backup a database and restore it in case of failure.
+---BACKUP SCRIPTS, Recovery Scripts and Documentation process.
+
+* What is Database backup and Recovery?
+  Database backup and recovery refers to the process of creating copies of database data (backup) and the subsequent process of restoring that data to its original or a new location in case of data loss or corruption (recovery).  
+Database backup and recovery are essential processes for safeguarding data integrity and ensuring business continuity. 
+Backup involves creating copies of database files, while recovery restores data from these copies after failures. 
+Below is a comprehensive guide to implementing this process, including scripts and documentation.
+
+1. BACKUP SCRIPT (backup/backup.sh)
+
+#!/bin/bash
+
+# Variables
+    DB_NAME="your_database"
+    DB_USER="root"
+    DB_PASSWORD="your_password"
+    BACKUP_DIR="../backup"
+    DATE=$(date +%F_%H-%M-%S)
+    BACKUP_FILE="$BACKUP_DIR/${DB_NAME}_backup_$DATE.sql"
+
+# Create backup directory if not exists
+  mkdir -p "$BACKUP_DIR"
+
+# Backup command
+  mysqldump -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" > "$BACKUP_FILE"
+
+# Check success
+  if [ $? -eq 0 ]; then
+    echo "Backup successful! File saved to $BACKUP_FILE"
+  else
+    echo "Backup failed!"
+  fi
+
+2. RECOVERY SCRIPT (recovery/restore.sh)
+
+#!/bin/bash
+
+# Variables
+  DB_NAME="your_database"
+  DB_USER="root"
+  DB_PASSWORD="your_password"
+  BACKUP_FILE="../backup/your_backup_file.sql"
+
+# Restore command
+  mysql -u "$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" < "$BACKUP_FILE"
+
+# Check success
+    if [ $? -eq 0 ]; then
+      echo "Database restored successfully from $BACKUP_FILE"
+    else
+      echo "Restore failed!"
+    fi
+
+3. DOCUMENTATION (README.md)
+# MySQL Database Backup and Recovery
+
+  This project demonstrates how to back up and restore a MySQL database using shell scripts. It simulates a disaster recovery plan for protecting critical data.
+
+## 🛠 Requirements
+
+- MySQL Server installed
+- Bash (Linux/macOS or WSL on Windows)
+- MySQL credentials
+---
+## 🔐 Setup
+1. Replace `your_database`, `your_password`, and `your_backup_file.sql` in the scripts with actual values.
+2. Make scripts executable:
+   ```bash
+   chmod +x backup/backup.sh
+   chmod +x recovery/restore.sh
+
+ ---Backup:
+  Run this command from the root directory:
+./backup/backup.sh
+This saves a .sql file with a timestamp in the backup/ folder.
+
+---Recovery:
+Update the BACKUP_FILE variable in restore.sh with the path to your desired backup file.
+
+Then run:
+./recovery/restore.sh
+
+--Sample Database
+  A sample SQL file (sample_db.sql) is included for testing. Import it with:
+mysql -u root -p < sample_db.sql
+
+** Important Points to remember:
+a) Do not store production passwords in plain text. Use environment variables or .my.cnf files in production.
+b) Schedule backups via cron job for automation.
+
+Directory Structure:
+
+database-backup-recovery/
+│
+├── backup/
+│   └── backup.sh
+├── recovery/
+│   └── restore.sh
+├── sample_db.sql
+├── README.md
+└── .gitignore
+
+
+
+
+
